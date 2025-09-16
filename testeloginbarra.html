@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teszte Login</title>
+    <style>
+        header{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        .header{
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header ul{
+            text-decoration: none;
+            list-style: none;
+        }
+        #nav{
+            display: flex;
+
+        }
+        #login{
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            max-height: 0;
+            overflow: hidden;
+            transition: 0.3s ease;
+        }
+        #login.abrir{
+            transition: 0.9s ease ;
+            max-height: 350px;
+        }
+        .form{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header">
+            <div>
+                LOGOONG
+            </div>
+            <div id="nav">
+                <ul>
+                    <li><a href="">HOME</a></li>
+                </ul>
+                <ul>
+                    <li><a href="">HOME</a></li>
+                </ul>
+                <ul>
+                    <li><a href="">HOME</a></li>
+                </ul>
+            </div>
+            <div>
+                <button onclick="login()">Login</button>
+            </div>
+        </div>
+        <div id="login">
+            <h1>Login</h1>
+            <form action="">
+                <div class="form">
+                    <input type="text">
+                    <input type="text">
+                    <button>Logar</button>
+                </div>
+            </form>
+        </div>
+
+    </header>
+
+    <section>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+        <h1>Nada</h1>
+    </section>
+
+    <script>
+        function login(){
+            const header = document.getElementById('login')
+            header.classList.toggle("abrir")
+        }
+
+    </script>
+</body>
+</html>
