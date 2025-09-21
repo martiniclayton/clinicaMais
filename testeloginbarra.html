@@ -28,21 +28,58 @@
 
         }
         #login{
+            width: 100%;
             padding: 10px;
             display: flex;
             flex-direction: column;
-            max-height: 0;
             overflow: hidden;
             transition: 0.3s ease;
         }
         #login.abrir{
             transition: 0.9s ease ;
-            max-height: 350px;
+            max-height: 400px;
         }
         .form{
             display: flex;
             flex-direction: column;
             gap: 10px;
+        }
+        .container{
+            width: 100%;
+            background-color: antiquewhite;
+        }
+        .row{
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            gap: 5px;
+            border: 1px solid red;
+        }
+        .col-md-4{
+            border: 1px solid red;
+            padding: 10px;
+            width: 20%;
+            min-width: 100px;
+        }
+        .col-md-8{
+            border: 1px solid red;
+            width: 80%;
+            padding: 10px;
+        }
+        .card{
+            border: 1px solid red;
+            width: 200px;
+            padding: 10px;
+            min-width: 100px;
+        }
+        .cards{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            border: 1px solid red;
+    justify-items: center; /* centraliza horizontalmente cada card */
+    align-items: start;    /* alinha cada card ao topo */
+    padding: 10px;
         }
     </style>
 </head>
@@ -76,6 +113,45 @@
                     <button>Logar</button>
                 </div>
             </form>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h2>Menu</h2>
+                        <ul>
+                            <li>Menu1</li>
+                            <li>Menu1</li>
+                            <li>Menu1</li>
+                            <li>Menu1</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-8">
+                        <h2>Bem-vindo, Joao</h2>
+                        <p>Aqui tera um texto com descrisao</p>
+                        <div class="cards">
+                            <div class="card">
+                                <h3>card 1</h3>
+                                <p>texto card 1</p>
+                                <button>botao</button>
+                            </div>
+                            <div class="card">
+                                <h3>card 1</h3>
+                                <p>texto card 1</p>
+                                <button>botao</button>
+                            </div>
+                            <div class="card">
+                                <h3>card 1</h3>
+                                <p>texto card 1</p>
+                                <button>botao</button>
+                            </div>
+                            <div class="card">
+                                <h3>card 1</h3>
+                                <p>texto card 1</p>
+                                <button>botao</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </header>
