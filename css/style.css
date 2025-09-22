@@ -222,7 +222,7 @@ img, input, button, select{
     }
     #info-pessoais{
         position: sticky !important;
-        top: 8px;
+        top: 110px;
     }
     .calcular-imc{
           background-color: white;
@@ -430,4 +430,9 @@ img, input, button, select{
 }
 .card-especialidades:hover{
     transform: scale(1.05);
+}
+
+.img{
+    border-radius: 10px;
+    box-shadow: 0 0 10px black;
 }

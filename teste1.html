@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Agendamento - Exemplo</title>
+<style>
+  /* (estilos simples, pegue o estilo anterior que gostou) */
+  body{font-family:Arial,Helvetica,sans-serif;background:#f5f7fa;margin:0;padding:20px;color:#222}
+  .tabs{display:flex;gap:8px;margin-bottom:16px}
+  .tab{padding:8px 12px;background:#eee;border-radius:6px;cursor:pointer}
+  .tab.active{background:#0b7b72;color:#fff}
+  .container{max-width:980px;margin:0 auto}
+  .unidade{background:#fff;padding:16px;border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .horarios{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .hora{padding:8px 12px;border-radius:6px;background:#e9ecef;cursor:pointer;font-weight:600}
+  .hora:hover{filter:brightness(.95)}
+  .hora.active{background:#0b7b72;color:#fff}
+  .hora.disabled{opacity:.4;cursor:not-allowed}
+  form{display:grid;gap:12px;margin-top:10px}
+  input,select,textarea{padding:10px;border-radius:6px;border:1px solid #ddd}
+  button{padding:12px;border:none;border-radius:8px;background:#0b7b72;color:#fff;font-weight:700;cursor:pointer}
+  .small{font-size:.9rem;color:#666}
+  @media(max-width:700px){.horarios{gap:6px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Agendamento</h1>
+
+  <!-- dias -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-day="hoje">Hoje</div>
+    <div class="tab" data-day="domingo">Domingo</div>
+    <div class="tab" data-day="segunda">Segunda</div>
+    <div class="tab" data-day="terca">Terça</div>
+    <div class="tab" data-day="quarta">Quarta</div>
+    <div class="tab" data-day="quinta">Quinta</div>
+  </div>
+
+  <!-- área onde vamos renderizar disponibilidade dinamicamente -->
+  <div id="dayContent"></div>
+
+  <hr/>
+
+  <h2>Dados do paciente</h2>
+  <form id="bookingForm">
+    <input type="text" name="nome" id="nome" placeholder="Nome completo" required />
+    <input type="email" name="email" id="email" placeholder="E-mail" />
+    <input type="tel" name="telefone" id="telefone" placeholder="Telefone" />
+    <textarea name="observacoes" id="observacoes" placeholder="Observações (opcional)"></textarea>
+
+    <!-- campos ocultos para enviar o slot selecionado -->
+    <input type="hidden" id="selected_unidade_id" name="unidade_id" />
+    <input type="hidden" id="selected_slot_id" name="slot_id" />
+    <input type="hidden" id="selected_date" name="data_agendada" />
+
+    <button type="submit" id="submitBtn" disabled>Confirmar agendamento</button>
+  </form>
+
+  <p id="msg" class="small"></p>
+</div>
+
+<script>
+// util: formata uma data legível (ex: yyyy-mm-dd) — aqui usamos hoje como exemplo
+const formatDate = (d) => {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+};
+
+let currentDate = new Date(); // por padrão exibe hoje
+let selected = { unidade_id: null, slot_id: null, data_agendada: null };
+
+const tabs = document.querySelectorAll('.tab');
+const dayContent = document.getElementById('dayContent');
+const submitBtn = document.getElementById('submitBtn');
+const msgEl = document.getElementById('msg');
+
+tabs.forEach(t => {
+  t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+
+    // aqui você pode decidir qual data corresponde à aba; para simplicidade:
+    // se clicar em "Hoje" -> currentDate = hoje; se clicar em "Domingo" -> +1 dia, etc.
+    // Exemplo simples: só mantemos hoje (você pode mapear as abas para datas reais)
+    currentDate = new Date();
+    loadAvailability(formatDate(currentDate));
+  });
+});
+
+// carrega disponibilidade do backend para a data
+async function loadAvailability(dateStr) {
+  dayContent.innerHTML = '<p>Carregando...</p>';
+  selected = { unidade_id: null, slot_id: null, data_agendada: null };
+  document.getElementById('selected_unidade_id').value = '';
+  document.getElementById('selected_slot_id').value = '';
+  document.getElementById('selected_date').value = '';
+
+  try {
+    const res = await fetch(`/api/availability.php?date=${dateStr}`);
+    if (!res.ok) throw new Error('Erro ao buscar disponibilidade');
+    const data = await res.json(); // { units: [ { id, nome, endereco, slots: [ { id, horario, booked } ] } ] }
+    renderUnits(data.units, dateStr);
+  } catch (err) {
+    dayContent.innerHTML = `<p class="small">Não foi possível carregar os horários. Tente novamente.</p>`;
+    console.error(err);
+  }
+}
+
+function renderUnits(units, dateStr) {
+  if (!units || units.length === 0) {
+    dayContent.innerHTML = '<p>Nenhuma unidade cadastrada.</p>';
+    return;
+  }
+  const html = units.map(u => {
+    const slotsHtml = u.slots.map(s => {
+      const cls = s.booked ? 'hora disabled' : 'hora';
+      return `<div class="${cls}" data-unidade="${u.id}" data-slot="${s.id}" data-time="${s.horario}">${s.horario}</div>`;
+    }).join('');
+    return `<div class="unidade">
+              <h3>${u.nome}</h3>
+              <div class="small">${u.endereco}</div>
+              <div class="horarios">${slotsHtml}</div>
+            </div>`;
+  }).join('');
+  dayContent.innerHTML = html;
+
+  // adiciona listeners nas horas
+  document.querySelectorAll('.hora').forEach(el => {
+    if (el.classList.contains('disabled')) return;
+    el.addEventListener('click', () => {
+      // desmarca outros no mesmo bloco
+      const container = el.closest('.horarios');
+      container.querySelectorAll('.hora').forEach(h => h.classList.remove('active'));
+      el.classList.add('active');
+
+      selected.unidade_id = el.dataset.unidade;
+      selected.slot_id = el.dataset.slot;
+      selected.data_agendada = dateStr;
+
+      // preenche campos ocultos
+      document.getElementById('selected_unidade_id').value = selected.unidade_id;
+      document.getElementById('selected_slot_id').value = selected.slot_id;
+      document.getElementById('selected_date').value = selected.data_agendada;
+
+      submitBtn.disabled = false;
+      msgEl.textContent = `Selecionado: ${el.textContent} - Unidade ID ${selected.unidade_id}`;
+    });
+  });
+
+  // desabilita botão até selecionar
+  submitBtn.disabled = true;
+}
+
+// envio do formulário
+document.getElementById('bookingForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  msgEl.textContent = '';
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Enviando...';
+
+  // coleta dados
+  const payload = {
+    unidade_id: document.getElementById('selected_unidade_id').value,
+    slot_id: document.getElementById('selected_slot_id').value,
+    data_agendada: document.getElementById('selected_date').value,
+    nome: document.getElementById('nome').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    telefone: document.getElementById('telefone').value.trim(),
+    observacoes: document.getElementById('observacoes').value.trim()
+  };
+
+  try {
+    const res = await fetch('/api/book.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Erro no servidor');
+
+    msgEl.textContent = '✅ Agendamento confirmado! ID: ' + data.agendamento_id;
+    document.getElementById('bookingForm').reset();
+    // recarrega disponibilidade para refletir a reserva
+    loadAvailability(payload.data_agendada);
+  } catch (err) {
+    console.error(err);
+    msgEl.textContent = '❌ ' + err.message;
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Confirmar agendamento';
+  }
+});
+
+// inicializa carregando hoje
+loadAvailability(formatDate(currentDate));
+</script>
+</body>
+</html>
