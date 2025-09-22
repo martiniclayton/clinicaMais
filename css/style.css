@@ -416,3 +416,18 @@ img, input, button, select{
     position: sticky !important;
     top: 160px;
 }
+
+.cinza{
+    background-color: #f8f9fa;
+}
+
+.card-especialidades{
+    box-shadow: 0 8px 10px rgba(0,0,0,0.15);
+    padding: 20px;
+    border-radius: 10px;
+    transition: 0.3s ease;
+    height: 170px;
+}
+.card-especialidades:hover{
+    transform: scale(1.05);
+}
